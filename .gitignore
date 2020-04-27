@@ -1,0 +1,11 @@
+# VisualStudio 2019
+.vs
+out
+CMakeSettings.json
+
+# VIM intermediate files
+*.swp
+
+
+# ctags | etags
+tags
