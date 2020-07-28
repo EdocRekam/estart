@@ -72,7 +72,7 @@
 #define C_ONLY_DIR_TDK_HOBART L"C:\\Work\\se.tdk-94"
 #define C_ONLY_DIR_TDK_IBARAKI L"C:\\Work\\se.tdk-20.3.11"
 
-#define C_ONLY_DIR_VIM L"C:\\programs\\vim\\vim80"
+#define C_ONLY_DIR_VIM L"C:\\Program Files\\Vim\\vim82"
 
 #define C_ONLY_DIR_VS2012 L"C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\Common7\\IDE"
 #define C_ONLY_DIR_VS2013 L"C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\IDE"

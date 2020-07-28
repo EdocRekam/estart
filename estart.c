@@ -1336,7 +1336,7 @@ int run_tfs2013(enum arch arch, enum env env)
 }
 
 /**
- * run_vim - Run VIM74
+ * run_vim - Run VIM82
  * @arch:	processor architecture X86 or X64
  * @env:	the desired environment
  *
@@ -1344,14 +1344,28 @@ int run_tfs2013(enum arch arch, enum env env)
  */
 int run_vim(enum arch arch, enum env env)
 {
+	int argc;
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
 	wchar_t cmdline[MAX_PATH];
+	wchar_t child_argv[MAX_PATH];
 	struct profile *prf = profile_get();
 	DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
+	LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
 
-	StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t), L"\"%s\"",
-			prf->tool[TOOL_VIM]);
+
+	child_argv[0] = '\0';
+	for (int n = 4; n < argc; ++n) {
+		StringCchCat(child_argv, MAX_PATH, L" \"");
+		StringCchCat(child_argv, MAX_PATH, argv[n]);
+		StringCchCat(child_argv, MAX_PATH, L"\"");
+	}
+	LocalFree(argv);
+
+	StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t),
+			L"\"%s\" %s",
+			prf->tool[TOOL_VIM],
+			child_argv);
 
 	env_switchto(arch, env, prf);
 	set_child_startupinfo(&si);
