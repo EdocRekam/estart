@@ -6,6 +6,7 @@
 #define ENVIRONMENT_BUFFER_SIZE 3072
 
 #include "c_only.h"
+#include "c_d.h"
 
 enum dir {
 	DIR_CL14_32,
@@ -118,6 +119,7 @@ enum env {
 
 enum pc {
 	C_ONLY,
+	C_D,
 	PC_NULL
 };
 
@@ -254,6 +256,7 @@ struct profile profile##COMPUTERNAME =\
 	}\
 }
 ALLOCATE_RUNTIME_PROFILE(C_ONLY);
+ALLOCATE_RUNTIME_PROFILE(C_D);
 #undef ALLOCATE_RUNTIME_PROFILE
 
 /* Support */
@@ -448,6 +451,9 @@ enum pc pc_conv(const wchar_t* const pc)
 		return C_ONLY;
 	if (0 == lstrcmpi(pc, L"ELSA"))
 		return C_ONLY;
+	if (0 == lstrcmpi(pc, L"CHICK-B"))
+		return C_D;
+
 	return PC_NULL;
 }
 
@@ -468,6 +474,7 @@ struct profile* profile_get()
 
 	switch(pc_conv(computerName)) {
 		CASE_PROFILE(C_ONLY)
+		CASE_PROFILE(C_D)
 	}
 	return &profileC_ONLY;
 }
