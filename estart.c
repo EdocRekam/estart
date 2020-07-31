@@ -847,6 +847,7 @@ int env_switchto_ibaraki64(struct profile *prf)
 {
 	SetEnvironmentVariable(L"PATH", prf->var[VAR_PATH]);
 	env_path_add_cwd();
+	env_arg_append(L"PATH", prf->dir[DIR_VIM]);
 	env_arg_append(L"PATH", prf->dir[DIR_GIT_BIN]);
 	env_arg_append(L"PATH", prf->dir[DIR_GIT_CMD]);
 	env_arg_append(L"PATH", prf->dir[DIR_MSBUILD16_64]);
@@ -1378,7 +1379,7 @@ int run_vim(enum arch arch, enum env env)
 	set_child_startupinfo(&si);
 	memset(&pi, 0, sizeof(pi));
 	CreateProcess(prf->tool[TOOL_VIM], cmdline, 0, 0, FALSE,
-			createFlags, 0,	prf->dir[DIR_PROJECT], &si, &pi);
+			createFlags, 0, 0, &si, &pi);
 
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
