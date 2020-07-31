@@ -70,7 +70,7 @@
 #define C_ONLY_DIR_TDK_FREETOWN L"C:\\Work\\tdkfreetown"
 #define C_ONLY_DIR_TDK_HERNE L"C:\\Work\\tdkherne"
 #define C_ONLY_DIR_TDK_HOBART L"C:\\Work\\se.tdk-94"
-#define C_ONLY_DIR_TDK_IBARAKI L"C:\\Work\\se.tdk-20.3.11"
+#define C_ONLY_DIR_TDK_IBARAKI L"C:\\Work\\se.tdk-now"
 
 #define C_ONLY_DIR_VIM L"C:\\Program Files\\Vim\\vim82"
 
