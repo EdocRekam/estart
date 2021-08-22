@@ -22,6 +22,8 @@ enum dir {
     DIR_DOTNET471_TOOLS64,
     DIR_DOTNET472_TOOLS32,
     DIR_DOTNET472_TOOLS64,
+    DIR_DOTNET480_TOOLS32,
+    DIR_DOTNET480_TOOLS64,
     DIR_DOTNET4_32,
     DIR_DOTNET4_64,
     DIR_DOTNET4_TOOLS32,
@@ -198,6 +200,8 @@ struct profile profile##COMPUTERNAME =\
         COMPUTERNAME ## _DIR_DOTNET471_TOOLS64,\
         COMPUTERNAME ## _DIR_DOTNET472_TOOLS32,\
         COMPUTERNAME ## _DIR_DOTNET472_TOOLS64,\
+        COMPUTERNAME ## _DIR_DOTNET480_TOOLS32,\
+        COMPUTERNAME ## _DIR_DOTNET480_TOOLS64,\
         COMPUTERNAME ## _DIR_DOTNET4_32,\
         COMPUTERNAME ## _DIR_DOTNET4_64,\
         COMPUTERNAME ## _DIR_DOTNET4_TOOLS32,\
@@ -852,7 +856,7 @@ int env_switchto_ibaraki64(struct profile *prf)
     env_arg_append(L"PATH", prf->dir[DIR_GIT_CMD]);
     env_arg_append(L"PATH", prf->dir[DIR_MSBUILD16_64]);
     env_arg_append(L"PATH", prf->dir[DIR_DOTNET461_64]);
-    env_arg_append(L"PATH", prf->dir[DIR_DOTNET472_TOOLS64]);
+    env_arg_append(L"PATH", prf->dir[DIR_DOTNET480_TOOLS64]);
     env_arg_append(L"PATH", prf->dir[DIR_WINSDK10_64]);
     env_arg_append(L"PATH", prf->dir[DIR_VS2019]);
     env_arg_append(L"PATH", prf->dir[DIR_CL14_64]);
@@ -1296,8 +1300,8 @@ int run_vs2019(enum arch arch, enum env env)
     struct profile *prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
 
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t), L"",
-        prf->tool[TOOL_VS2019]);
+    StringCchPrintf(cmdline, sizeof(cmdline) /sizeof(wchar_t),
+                    L"\"%s\" %s", prf->tool[TOOL_VS2019], L"/LOG");
 
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);

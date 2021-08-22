@@ -21,8 +21,8 @@
 #define C_D_VS2017_MASTER_SETTINGS L""
 
 /* Paths */
-#define C_D_DIR_CL14_32 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\14.0\\VC\\bin"
-#define C_D_DIR_CL14_64 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\14.0\\VC\\bin\\x86_amd64"
+#define C_D_DIR_CL14_32 L"c:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30037\\bin\\Hostx64\\x86"
+#define C_D_DIR_CL14_64 L"c:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30037\\bin\\Hostx64\\x64"
 #define C_D_DIR_CMAKE L"C:\\Program Files\\cmake\\bin"
 #define C_D_DIR_DOTNET32 L"C:\\Program Files (x86)\\dotnet"
 #define C_D_DIR_DOTNET64 L"C:\\Program Files\\dotnet"
@@ -60,7 +60,6 @@
 #define C_D_DIR_MSBUILD16_32 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin"
 #define C_D_DIR_MSBUILD16_64 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\amd64"
 
-
 #define C_D_DIR_NASM L"D:\\Programs\\nasm-2.11.08"
 #define C_D_DIR_PROJECT L"D:\\Work"
 #define C_D_DIR_SLICKEDIT L"D:\\Programs\\Slickedit"
@@ -85,8 +84,8 @@
 
 #define C_D_DIR_WINSDK81_32 L"C:\\Program Files (x86)\\Windows Kits\\8.1\\bin\\x86"
 #define C_D_DIR_WINSDK81_64 L"C:\\Program Files (x86)\\Windows Kits\\8.1\\bin\\x64"
-#define C_D_DIR_WINSDK10_32 L"C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.18362.0\\x86"
-#define C_D_DIR_WINSDK10_64 L"C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.18362.0\\x64"
+#define C_D_DIR_WINSDK10_32 L"C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.19041.0\\x86"
+#define C_D_DIR_WINSDK10_64 L"C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.19041.0\\x64"
 
 #define C_D_DIR_WPT L"C:\\Program Files (x86)\\Windows Kits\\8.1\\Windows Performance Toolkit"
 
