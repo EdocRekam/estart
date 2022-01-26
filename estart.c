@@ -1141,18 +1141,41 @@ int run_bash(enum arch arch, enum env env)
 {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    wchar_t cmdline[MAX_PATH];
-    struct profile *prf = profile_get();
+    wchar_t cmdline[2048];
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
+    struct profile *prf = profile_get();
 
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t),
-            L"\"%s\" --login -i", prf->tool[TOOL_BASH]);
+    StringCchPrintf(
+        cmdline,
+        sizeof(cmdline) / sizeof(wchar_t),
+        L"\"%s\" %s %s %s %s %s %s\"%s\" %s \"%s\" %s",
+        prf->tool[TOOL_MINTTY],
+        L"-t BASH",
+        L"--nodaemon",
+        L"-o AppID=GitForWindows.Bash",
+        L"-o AppName=\"Git Bash\"",
+        L"--store-taskbar-properties",
+        L"-o AppLanchCmd=",
+        prf->tool[TOOL_BASH],
+        L"-i",
+        prf->tool[TOOL_BASH],
+        L"-- /usr/bin/bash --login -i"
+    );
 
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
     memset(&pi, 0, sizeof(pi));
-    CreateProcess(prf->tool[TOOL_BASH], cmdline, 0, 0, FALSE, createFlags,
-            0, prf->dir[DIR_PROJECT], &si, &pi);
+    CreateProcess(
+        prf->tool[TOOL_MINTTY],
+        cmdline,
+        0,
+        0,
+        FALSE,
+        createFlags,
+        0,
+        prf->dir[DIR_PROJECT],
+        &si, &pi
+    );
 
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);

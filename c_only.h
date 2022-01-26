@@ -90,7 +90,7 @@
 #define C_ONLY_DIR_WPT L"C:\\Program Files (x86)\\Windows Kits\\8.1\\Windows Performance Toolkit"
 
 /* Tools */
-#define C_ONLY_BASH C_ONLY_DIR_GIT_BIN L"\\sh.exe"
+#define C_ONLY_BASH C_ONLY_DIR_GIT L"\\git-bash.exe"
 #define C_ONLY_CONSOLE L"C:\\Windows\\System32\\cmd.exe"
 #define C_ONLY_MERGE C_ONLY_DIR_SLICKEDIT L"\\win\\vsmerge.exe"
 #define C_ONLY_SLICKEDIT C_ONLY_DIR_SLICKEDIT L"\\win\\vs.exe"

@@ -90,7 +90,7 @@
 #define C_D_DIR_WPT L"C:\\Program Files (x86)\\Windows Kits\\8.1\\Windows Performance Toolkit"
 
 /* Tools */
-#define C_D_BASH C_D_DIR_GIT_BIN L"\\sh.exe"
+#define C_D_BASH C_D_DIR_GIT L"\\git-bash.exe"
 #define C_D_CONSOLE L"C:\\Windows\\System32\\cmd.exe"
 #define C_D_MERGE C_D_DIR_SLICKEDIT L"\\win\\vsmerge.exe"
 #define C_D_SLICKEDIT C_D_DIR_SLICKEDIT L"\\win\\vs.exe"
