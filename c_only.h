@@ -5,7 +5,7 @@
    drive. */
 
 /* Environment variables */
-#define C_ONLY_NT_SYMBOL_PATH L"c:\\Work\\PrivateSymbols;" L"C:\\Work\\PublicSymbols"
+#define C_ONLY_NT_SYMBOL_PATH L"c:\\data\\Work\\PrivateSymbols;" L"C:\\data\\Work\\PublicSymbols"
 #define C_ONLY_PATH L"c:\\windows\\system32;c:\\windows;c:\\windows\\system32\\wbem"
 #define C_ONLY_TERM L"cygwin"
 #define C_ONLY_GITDIR L"C:\\Program Files\\Git"
@@ -23,6 +23,7 @@
 /* Paths */
 #define C_ONLY_DIR_CL14_32 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.30.30528\\bin\\Hostx64\\x86"
 #define C_ONLY_DIR_CL14_64 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.30.30528\\bin\\Hostx64\\x64"
+
 #define C_ONLY_DIR_CMAKE L"C:\\Program Files\\cmake\\bin"
 #define C_ONLY_DIR_DOTNET32 L"C:\\Program Files (x86)\\dotnet"
 #define C_ONLY_DIR_DOTNET64 L"C:\\Program Files\\dotnet"
@@ -48,7 +49,7 @@
 #define C_ONLY_DIR_GIT_CMD L"C:\\Program Files\\Git\\cmd"
 #define C_ONLY_DIR_GIT_TF L"C:\\programs\\git-tf"
 
-#define C_ONLY_DIR_HOME L"C:\\Work\\Home"
+#define C_ONLY_DIR_HOME L"C:\\data\\Work\\Home"
 #define C_ONLY_DIR_JRE L"C:\\Program Files\\java\\jre7\\bin"
 
 #define C_ONLY_DIR_MSBUILD12_32 L"C:\\Program Files (x86)\\MSBuild\\12.0\\Bin"
@@ -60,16 +61,17 @@
 #define C_ONLY_DIR_MSBUILD16_32 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\MSBuild\\Current\\Bin"
 #define C_ONLY_DIR_MSBUILD16_64 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\MSBuild\\Current\\Bin\\amd64"
 
+
 #define C_ONLY_DIR_NASM L"C:\\programs\\nasm-2.11.08"
-#define C_ONLY_DIR_PROJECT L"C:\\Work"
+#define C_ONLY_DIR_PROJECT L"C:\\data\\Work"
 #define C_ONLY_DIR_SLICKEDIT L"C:\\programs\\slickedit"
 #define C_ONLY_DIR_SLICKEDIT_CFG L"\"" L"C:\\data\\slickedit" L"\""
 
-#define C_ONLY_DIR_TBC L"C:\\Work\\tbc"
-#define C_ONLY_DIR_TDK_FREETOWN L"C:\\Work\\tdkfreetown"
-#define C_ONLY_DIR_TDK_HERNE L"C:\\Work\\tdkherne"
-#define C_ONLY_DIR_TDK_HOBART L"C:\\Work\\se.tdk-94"
-#define C_ONLY_DIR_TDK_IBARAKI L"C:\\Work\\se.tdk-now"
+#define C_ONLY_DIR_TBC L"C:\\data\\Work\\tbc"
+#define C_ONLY_DIR_TDK_FREETOWN L"C:\\data\\Work\\tdkfreetown"
+#define C_ONLY_DIR_TDK_HERNE L"C:\\data\\Work\\tdkherne"
+#define C_ONLY_DIR_TDK_HOBART L"C:\\data\\Work\\se.tdk-94"
+#define C_ONLY_DIR_TDK_IBARAKI L"C:\\data\\Work\\se.tdk-now"
 
 #define C_ONLY_DIR_VIM L"C:\\Program Files\\Vim\\vim82"
 
