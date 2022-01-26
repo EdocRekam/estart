@@ -82,6 +82,7 @@ enum tool {
     TOOL_WINDBG32,
     TOOL_WINDBG64,
     TOOL_VSCODE,
+    TOOL_MINTTY,
     TOOL_NUM
 };
 
@@ -256,7 +257,8 @@ struct profile profile##COMPUTERNAME =\
         COMPUTERNAME ## _VS2019,\
         COMPUTERNAME ## _WINDBG32,\
         COMPUTERNAME ## _WINDBG64,\
-        COMPUTERNAME ## _VSCODE \
+        COMPUTERNAME ## _VSCODE, \
+        COMPUTERNAME ## _MINTTY \
     }\
 }
 ALLOCATE_RUNTIME_PROFILE(C_ONLY);

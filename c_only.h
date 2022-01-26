@@ -105,5 +105,6 @@
 #define C_ONLY_WINDBG32 L"C:\\Program Files (x86)\\Windows Kits\\8.1\\Debuggers\\x86\\windbg.exe"
 #define C_ONLY_WINDBG64 L"C:\\Program Files (x86)\\Windows Kits\\8.1\\Debuggers\\x64\\windbg.exe"
 #define C_ONLY_VSCODE L"C:\\Program Files\\Microsoft VS Code\\Code.exe"
+#define C_ONLY_MINTTY L"C:\\Program Files\\Git\\usr\\bin\\mintty.exe"
 
 #endif
