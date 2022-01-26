@@ -911,7 +911,7 @@ int run_slickedit(enum arch arch, enum env env)
     int argc;
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    wchar_t cmdline[MAX_PATH];
+    wchar_t cmdline[2048];
     wchar_t child_argv[MAX_PATH];
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
     struct profile *prf = profile_get();
@@ -969,7 +969,7 @@ int run_commit(enum arch arch, enum env env)
     int argc;
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    wchar_t cmdline[MAX_PATH];
+    wchar_t cmdline[2048];
     wchar_t child_argv[MAX_PATH];
     struct profile *prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
@@ -1006,7 +1006,7 @@ int run_cmd(enum arch arch, enum env env)
 {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    wchar_t cmdline[MAX_PATH];
+    wchar_t cmdline[2048];
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
     struct profile *prf = profile_get();
 
@@ -1031,7 +1031,7 @@ int run_diff(enum arch arch, enum env env)
 {
     int argc;
     STARTUPINFO si;
-    wchar_t cmdline[8192];
+    wchar_t cmdline[2048];
     PROCESS_INFORMATION pi;
     wchar_t child_argv[MAX_PATH];
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
@@ -1070,7 +1070,7 @@ int run_merge(enum arch arch, enum env env)
 {
     int argc;
     STARTUPINFO si;
-    wchar_t cmdline[8192];
+    wchar_t cmdline[2048];
     PROCESS_INFORMATION pi;
     wchar_t child_argv[MAX_PATH];
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
