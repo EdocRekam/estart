@@ -1207,7 +1207,6 @@ int run_vs2012(enum arch arch, enum env env)
 {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    wchar_t cmdline[MAX_PATH];
     struct profile *prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
 
@@ -1215,13 +1214,10 @@ int run_vs2012(enum arch arch, enum env env)
     CopyFile(prf->file[FILE_VS2012_SETTINGS_MASTER],
          prf->file[FILE_VS2012_SETTINGS_CURRENT], FALSE);
 
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t), L"",
-            prf->tool[TOOL_VS2012]);
-
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
     memset(&pi, 0, sizeof(pi));
-    CreateProcess(prf->tool[TOOL_VS2012], cmdline, 0, 0, FALSE,
+    CreateProcess(prf->tool[TOOL_VS2012], prf->tool[TOOL_VS2012], 0, 0, FALSE,
             createFlags, 0, prf->dir[DIR_PROJECT], &si, &pi);
 
     CloseHandle(pi.hProcess);
@@ -1240,7 +1236,6 @@ int run_vs2013(enum arch arch, enum env env)
 {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    wchar_t cmdline[MAX_PATH];
     struct profile *prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
 
@@ -1248,13 +1243,10 @@ int run_vs2013(enum arch arch, enum env env)
     CopyFile(prf->file[FILE_VS2013_SETTINGS_MASTER],
             prf->file[FILE_VS2013_SETTINGS_CURRENT], FALSE);
 
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t), L"",
-            prf->tool[TOOL_VS2013]);
-
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
     memset(&pi, 0, sizeof(pi));
-    CreateProcess(prf->tool[TOOL_VS2013], cmdline, 0, 0, FALSE, createFlags,
+    CreateProcess(prf->tool[TOOL_VS2013], prf->tool[TOOL_VS2013], 0, 0, FALSE, createFlags,
             0, prf->dir[DIR_PROJECT], &si, &pi);
 
     CloseHandle(pi.hProcess);
@@ -1273,7 +1265,6 @@ int run_vs2015(enum arch arch, enum env env)
 {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    wchar_t cmdline[MAX_PATH];
     struct profile *prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
 
@@ -1281,13 +1272,10 @@ int run_vs2015(enum arch arch, enum env env)
     CopyFile(prf->file[FILE_VS2015_SETTINGS_MASTER],
          prf->file[FILE_VS2015_SETTINGS_CURRENT], FALSE);
 
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t), L"",
-            prf->tool[TOOL_VS2015]);
-
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
     memset(&pi, 0, sizeof(pi));
-    CreateProcess(prf->tool[TOOL_VS2015], cmdline, 0, 0, FALSE,
+    CreateProcess(prf->tool[TOOL_VS2015], prf->tool[TOOL_VS2015], 0, 0, FALSE,
             createFlags, 0, prf->dir[DIR_PROJECT], &si, &pi);
 
     CloseHandle(pi.hProcess);
@@ -1306,17 +1294,13 @@ int run_vs2017(enum arch arch, enum env env)
 {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    wchar_t cmdline[MAX_PATH];
     struct profile *prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
-
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t), L"",
-        prf->tool[TOOL_VS2017]);
 
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
     memset(&pi, 0, sizeof(pi));
-    CreateProcess(prf->tool[TOOL_VS2017], cmdline, 0, 0, FALSE,
+    CreateProcess(prf->tool[TOOL_VS2017], prf->tool[TOOL_VS2017], 0, 0, FALSE,
         createFlags, 0, prf->dir[DIR_PROJECT], &si, &pi);
 
     CloseHandle(pi.hProcess);
@@ -1386,7 +1370,6 @@ int run_tfs2013(enum arch arch, enum env env)
 {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    wchar_t cmdline[MAX_PATH];
     struct profile *prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
 
@@ -1394,13 +1377,10 @@ int run_tfs2013(enum arch arch, enum env env)
     CopyFile(prf->file[FILE_VS2013_SETTINGS_MASTER],
          prf->file[FILE_VS2013_SETTINGS_CURRENT], FALSE);
 
-    StringCchPrintf(cmdline, sizeof(cmdline)/sizeof(wchar_t), L"",
-            prf->tool[TOOL_VS2013]);
-
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
     memset(&pi, 0, sizeof(pi));
-    CreateProcess(prf->tool[TOOL_VS2013], cmdline, 0, 0, FALSE,
+    CreateProcess(prf->tool[TOOL_VS2013], prf->tool[TOOL_VS2013], 0, 0, FALSE,
             createFlags, 0, prf->dir[DIR_PROJECT], &si, &pi);
 
     CloseHandle(pi.hProcess);
@@ -1461,7 +1441,6 @@ int run_tfs2012(enum arch arch, enum env env)
 {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    wchar_t cmdline[MAX_PATH];
     struct profile *prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
 
@@ -1469,13 +1448,10 @@ int run_tfs2012(enum arch arch, enum env env)
     CopyFile(prf->file[FILE_VS2012_SETTINGS_MASTER],
          prf->file[FILE_VS2012_SETTINGS_CURRENT], FALSE);
 
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t), L"",
-            prf->tool[TOOL_VS2012]);
-
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
     memset(&pi, 0, sizeof(pi));
-    CreateProcess(prf->tool[TOOL_VS2012], cmdline, 0, 0, FALSE,
+    CreateProcess(prf->tool[TOOL_VS2012], prf->tool[TOOL_VS2012], 0, 0, FALSE,
             createFlags, 0, prf->dir[DIR_PROJECT], &si, &pi);
 
     CloseHandle(pi.hProcess);
