@@ -468,6 +468,8 @@ enum pc pc_conv(const wchar_t* const pc)
         return C_ONLY;
     if (0 == lstrcmpi(pc, L"CHICK-B"))
         return C_D;
+    if (0 == lstrcmpi(pc, L"CHICK-C"))
+        return C_ONLY;
 
     return PC_NULL;
 }
