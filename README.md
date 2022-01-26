@@ -36,3 +36,8 @@ diff viewer.
 
 I've had problems in the past trying to wrap that command with PERL scripts or
 found it tedious with batch files.
+
+## Useful Commands
+estart.exe BASH 64 IBARAKI
+estart.exe CONSOLE 64 IBARAKI
+estart.exe VSCODE 64 IBARAKI
