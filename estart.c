@@ -57,6 +57,7 @@ enum dir {
     DIR_VS2015,
     DIR_VS2017,
     DIR_VS2019,
+    DIR_VS2022,
     DIR_WINDBG32,
     DIR_WINDBG64,
     DIR_WINSDK81_32,
@@ -79,6 +80,7 @@ enum tool {
     TOOL_VS2015,
     TOOL_VS2017,
     TOOL_VS2019,
+    TOOL_VS2022,
     TOOL_WINDBG32,
     TOOL_WINDBG64,
     TOOL_VSCODE,
@@ -140,6 +142,7 @@ enum opcode {
     OPC_VS2015,
     OPC_VS2017,
     OPC_VS2019,
+    OPC_VS2022,
     OPC_SLICKEDIT_DIFF,
     OPC_SLICKEDIT_MERGE,
     OPC_WINDBG,
@@ -235,6 +238,8 @@ struct profile profile##COMPUTERNAME =\
         COMPUTERNAME ## _DIR_VS2013,\
         COMPUTERNAME ## _DIR_VS2015,\
         COMPUTERNAME ## _DIR_VS2017,\
+        COMPUTERNAME ## _DIR_VS2019,\
+        COMPUTERNAME ## _DIR_VS2022,\
         COMPUTERNAME ## _DIR_WINDBG32,\
         COMPUTERNAME ## _DIR_WINDBG64,\
         COMPUTERNAME ## _DIR_WINSDK81_32,\
@@ -255,6 +260,7 @@ struct profile profile##COMPUTERNAME =\
         COMPUTERNAME ## _VS2015,\
         COMPUTERNAME ## _VS2017,\
         COMPUTERNAME ## _VS2019,\
+        COMPUTERNAME ## _VS2022,\
         COMPUTERNAME ## _WINDBG32,\
         COMPUTERNAME ## _WINDBG64,\
         COMPUTERNAME ## _VSCODE, \
@@ -303,6 +309,7 @@ int run_vs2013(enum arch, enum env);
 int run_vs2015(enum arch, enum env);
 int run_vs2017(enum arch, enum env);
 int run_vs2019(enum arch, enum env);
+int run_vs2022(enum arch, enum env);
 int run_windbg(enum arch, enum env);
 int run_vscode(enum arch, enum env);
 
@@ -406,6 +413,8 @@ enum opcode opcode_conv(const wchar_t* const opcode)
         return OPC_VS2017;
     if (0 == lstrcmpi(opcode, L"VS2019"))
         return OPC_VS2019;
+    if (0 == lstrcmpi(opcode, L"VS2022"))
+        return OPC_VS2022;
     if (0 == lstrcmpi(opcode, L"VSDIFF"))
         return OPC_SLICKEDIT_DIFF;
     if (0 == lstrcmpi(opcode, L"VSMERGE"))
@@ -537,6 +546,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         break;
     case OPC_VS2019:
         run_vs2019(cmd.arch, cmd.env);
+        break;
+    case OPC_VS2022:
+        run_vs2022(cmd.arch, cmd.env);
         break;
     case OPC_SLICKEDIT_DIFF:
         run_diff(cmd.arch, cmd.env);
@@ -1332,6 +1344,28 @@ int run_vs2019(enum arch arch, enum env env)
     set_child_startupinfo(&si);
     memset(&pi, 0, sizeof(pi));
     CreateProcess(prf->tool[TOOL_VS2019], cmdline, 0, 0, FALSE,
+        createFlags, 0, prf->dir[DIR_PROJECT], &si, &pi);
+
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    return 0;
+}
+
+int run_vs2022(enum arch arch, enum env env)
+{
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    wchar_t cmdline[MAX_PATH];
+    struct profile* prf = profile_get();
+    DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
+
+    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t),
+        L"\"%s\" %s", prf->tool[TOOL_VS2022], L"/LOG");
+
+    env_switchto(arch, env, prf);
+    set_child_startupinfo(&si);
+    memset(&pi, 0, sizeof(pi));
+    CreateProcess(prf->tool[TOOL_VS2022], cmdline, 0, 0, FALSE,
         createFlags, 0, prf->dir[DIR_PROJECT], &si, &pi);
 
     CloseHandle(pi.hProcess);

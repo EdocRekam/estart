@@ -21,8 +21,8 @@
 #define C_ONLY_VS2017_MASTER_SETTINGS L""
 
 /* Paths */
-#define C_ONLY_DIR_CL14_32  L"c:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30037\\bin\\Hostx64\\x86"
-#define C_ONLY_DIR_CL14_64 L"c:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\14.29.30037\\bin\\Hostx64\\x64"
+#define C_ONLY_DIR_CL14_32 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.30.30528\\bin\\Hostx64\\x86"
+#define C_ONLY_DIR_CL14_64 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.30.30528\\bin\\Hostx64\\x64"
 #define C_ONLY_DIR_CMAKE L"C:\\Program Files\\cmake\\bin"
 #define C_ONLY_DIR_DOTNET32 L"C:\\Program Files (x86)\\dotnet"
 #define C_ONLY_DIR_DOTNET64 L"C:\\Program Files\\dotnet"
@@ -57,8 +57,8 @@
 #define C_ONLY_DIR_MSBUILD14_64 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2015\\Enterprise\\MSBuild\\14.0\\Bin\\amd64"
 #define C_ONLY_DIR_MSBUILD15_32 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\MSBuild\\15.0\\Bin"
 #define C_ONLY_DIR_MSBUILD15_64 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\MSBuild\\15.0\\Bin\\amd64"
-#define C_ONLY_DIR_MSBUILD16_32 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin"
-#define C_ONLY_DIR_MSBUILD16_64 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\amd64"
+#define C_ONLY_DIR_MSBUILD16_32 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\MSBuild\\Current\\Bin"
+#define C_ONLY_DIR_MSBUILD16_64 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\MSBuild\\Current\\Bin\\amd64"
 
 #define C_ONLY_DIR_NASM L"C:\\programs\\nasm-2.11.08"
 #define C_ONLY_DIR_PROJECT L"C:\\Work"
@@ -78,6 +78,7 @@
 #define C_ONLY_DIR_VS2015 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2015\\Enterprise\\Common7\\IDE"
 #define C_ONLY_DIR_VS2017 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\IDE"
 #define C_ONLY_DIR_VS2019 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\IDE"
+#define C_ONLY_DIR_VS2022 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\Common7\\IDE"
 
 #define C_ONLY_DIR_WINDBG32 L"C:\\Program Files (x86)\\Windows Kits\\8.1\\Debuggers\\x86"
 #define C_ONLY_DIR_WINDBG64 L"C:\\Program Files (x86)\\Windows Kits\\8.1\\Debuggers\\x64"
@@ -102,6 +103,7 @@
 #define C_ONLY_VS2015 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2015\\Enterprise\\Common7\\IDE\\devenv.exe"
 #define C_ONLY_VS2017 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\IDE\\devenv.exe"
 #define C_ONLY_VS2019 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\IDE\\devenv.exe"
+#define C_ONLY_VS2022 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\Common7\\IDE\\dvenv.exe"
 #define C_ONLY_WINDBG32 L"C:\\Program Files (x86)\\Windows Kits\\8.1\\Debuggers\\x86\\windbg.exe"
 #define C_ONLY_WINDBG64 L"C:\\Program Files (x86)\\Windows Kits\\8.1\\Debuggers\\x64\\windbg.exe"
 #define C_ONLY_VSCODE L"C:\\Program Files\\Microsoft VS Code\\Code.exe"
