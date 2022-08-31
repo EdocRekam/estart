@@ -61,7 +61,6 @@
 #define C_ONLY_DIR_MSBUILD16_32 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\MSBuild\\Current\\Bin"
 #define C_ONLY_DIR_MSBUILD16_64 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\MSBuild\\Current\\Bin\\amd64"
 
-
 #define C_ONLY_DIR_NASM L"C:\\programs\\nasm-2.11.08"
 #define C_ONLY_DIR_PROJECT L"C:\\data\\Work"
 #define C_ONLY_DIR_SLICKEDIT L"C:\\programs\\slickedit"
@@ -73,7 +72,7 @@
 #define C_ONLY_DIR_TDK_HOBART L"C:\\data\\Work\\se.tdk-94"
 #define C_ONLY_DIR_TDK_IBARAKI L"C:\\data\\Work\\se.tdk-now"
 
-#define C_ONLY_DIR_VIM L"C:\\Program Files\\Vim\\vim82"
+#define C_ONLY_DIR_VIM L"C:\\Program Files (x86)\\Vim\\vim82"
 
 #define C_ONLY_DIR_VS2012 L"C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\Common7\\IDE"
 #define C_ONLY_DIR_VS2013 L"C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\IDE"

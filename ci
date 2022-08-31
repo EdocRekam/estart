@@ -40,7 +40,7 @@ cc() {
     # Ob2         Expand any function not explicitly marked for no inlining.
     # W4          Warning Level
     # Zc:wchar_t  wchar_t is native type
-    cflags='-c -GS- -Gs8192 -Gz -MT -O1 -Ob2 -Zc:wchar_t -W4 -D_UNICODE -D_WINDOWS -DNDEBUG -DUNICODE -DWIN32'
+    cflags="-c -GS- -Gs8192 -Gz -MT -O1 -Ob2 -Zc:wchar_t -W4"
     /c/Program\ Files/Microsoft\ Visual\ Studio/2022/Enterprise/VC/Tools/MSVC/${MSVC}/bin/Hostx64/x64/cl.exe ${cflags} "$@"
 }
 
@@ -53,7 +53,8 @@ ld () {
 # BUILD
 rm -f rm -f estart.exe estart.obj
 cc estart.c
-ld -out:estart.exe estart.obj kernel32.lib shlwapi.lib shell32.lib ucrt.lib
+ld -out:estart.exe estart.obj kernel32.lib shlwapi.lib shell32.lib
+cp estart.exe /c/data/Work/estart.exe
 
 Finish=$(date +%s)
 Duration=$((Finish - Start))

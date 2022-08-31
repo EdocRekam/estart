@@ -1,11 +1,14 @@
-#define STRSAFE_NO_CB_FUNCTIONS
+#define _WINDOWS
+#define NDEBUG
+#define UNICODE
+#define _UNICODE
+#define WIN32
 
 #include <Windows.h>
-#include <strsafe.h>
 #include <shlwapi.h>
 
 /* Misc */
-#define ENV_BUFFER_SIZE 3072
+#define ENV_BUFFER_SIZE 1024
 
 #include "c_only.h"
 #include "c_d.h"
@@ -281,20 +284,20 @@ struct command command_get();
 struct profile* profile_get();
 int arg_rinse(wchar_t* dirtyArg);
 int set_child_startupinfo(STARTUPINFO *inf);
+int append(wchar_t* x, int xi, wchar_t* y);
+int quote(wchar_t* x, int xi, wchar_t* y);
 
 /* Process Environment */
 enum env env_conv(const wchar_t* const env);
 void env_arg_append(wchar_t* variable, wchar_t* val);
 int env_path_add_cwd();
 int env_switchto(enum arch arch, enum env env, struct profile* prf);
-int env_switchto_freetown32(struct profile *prf);
-int env_switchto_freetown64(struct profile *prf);
 int env_switchto_herne32(struct profile *prf);
 int env_switchto_herne64(struct profile *prf);
 int env_switchto_hobart32(struct profile *prf);
 int env_switchto_hobart64(struct profile *prf);
-int env_switchto_ibaraki32(struct profile *prf);
-int env_switchto_ibaraki64(struct profile *prf);
+void env_switchto_ibaraki32(struct profile *prf);
+void env_switchto_ibaraki64(struct profile *prf);
 
 /* Tools */
 int run_bash(enum arch, enum env);
@@ -303,13 +306,7 @@ int run_commit(enum arch, enum env);
 int run_diff(enum arch, enum env);
 int run_merge(enum arch, enum env);
 int run_slickedit(enum arch, enum env);
-int run_tfs2012(enum arch, enum env);
-int run_tfs2013(enum arch, enum env);
 int run_vim(enum arch, enum env);
-int run_vs2012(enum arch, enum env);
-int run_vs2013(enum arch, enum env);
-int run_vs2015(enum arch, enum env);
-int run_vs2017(enum arch, enum env);
 int run_vs2019(enum arch, enum env);
 int run_vs2022(enum arch, enum env);
 int run_windbg(enum arch, enum env);
@@ -328,9 +325,6 @@ int env_switchto(enum arch arch, enum env env, struct profile *prf)
     switch (arch) {
     case X86:
         switch (env) {
-        case ENV_FREETOWN:
-            env_switchto_freetown32(prf);
-            break;
         case ENV_HERNE:
             env_switchto_herne32(prf);
             break;
@@ -344,9 +338,6 @@ int env_switchto(enum arch arch, enum env env, struct profile *prf)
         break;
     case X64:
         switch (env) {
-        case ENV_FREETOWN:
-            env_switchto_freetown64(prf);
-            break;
         case ENV_HERNE:
             env_switchto_herne64(prf);
             break;
@@ -370,7 +361,8 @@ struct command command_get()
     int argc;
     struct command ret;
 
-    LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    LPWSTR cmdline = GetCommandLineW();
+    LPWSTR *argv = CommandLineToArgvW(cmdline, &argc);
     if (!argv) {
         ret.opcode = opcode_conv(L"VSCODE");
         ret.arch = arch_conv(L"64");
@@ -399,20 +391,8 @@ enum opcode opcode_conv(const wchar_t* const opcode)
         return OPC_CMD;
     if (0 == lstrcmpi(opcode, L"SLICKEDIT"))
         return OPC_SLICKEDIT;
-    if (0 == lstrcmpi(opcode, L"TFS2012"))
-        return OPC_TFS2012;
-    if (0 == lstrcmpi(opcode, L"TFS2013"))
-        return OPC_TFS2013;
     if (0 == lstrcmpi(opcode, L"VIM"))
         return OPC_VIM;
-    if (0 == lstrcmpi(opcode, L"VS2012"))
-        return OPC_VS2012;
-    if (0 == lstrcmpi(opcode, L"VS2013"))
-        return OPC_VS2013;
-    if (0 == lstrcmpi(opcode, L"VS2015"))
-        return OPC_VS2015;
-    if (0 == lstrcmpi(opcode, L"VS2017"))
-        return OPC_VS2017;
     if (0 == lstrcmpi(opcode, L"VS2019"))
         return OPC_VS2019;
     if (0 == lstrcmpi(opcode, L"VS2022"))
@@ -440,8 +420,6 @@ enum env env_conv(const wchar_t* const env)
         return ENV_HOBART;
     if (0 == lstrcmpi(env, L"HERNE"))
         return ENV_HERNE;
-    if (0 == lstrcmpi(env, L"FREETOWN"))
-        return ENV_FREETOWN;
     return ENV_NULL;
 }
 
@@ -515,26 +493,8 @@ int rawmain(int argc, char** argv)
     case OPC_SLICKEDIT:
         run_slickedit(cmd.arch, cmd.env);
         break;
-    case OPC_TFS2012:
-        run_tfs2012(cmd.arch, cmd.env);
-        break;
-    case OPC_TFS2013:
-        run_tfs2013(cmd.arch, cmd.env);
-        break;
-    case OPC_VS2012:
-        run_vs2012(cmd.arch, cmd.env);
-        break;
     case OPC_VIM:
         run_vim(cmd.arch, cmd.env);
-        break;
-    case OPC_VS2013:
-        run_vs2013(cmd.arch, cmd.env);
-        break;
-    case OPC_VS2015:
-        run_vs2015(cmd.arch, cmd.env);
-        break;
-    case OPC_VS2017:
-        run_vs2017(cmd.arch, cmd.env);
         break;
     case OPC_VS2019:
         run_vs2019(cmd.arch, cmd.env);
@@ -564,95 +524,14 @@ void env_arg_append(wchar_t* var, wchar_t* val)
 {
     wchar_t old[ENV_BUFFER_SIZE];
     wchar_t now[ENV_BUFFER_SIZE];
+    int i;
+
     GetEnvironmentVariable(var, &old[0], ENV_BUFFER_SIZE);
-    StringCchPrintf(now, sizeof(now) / sizeof(wchar_t), L"%s;%s", old, val);
+    i=0;
+    i = append(now, i, old);
+    i = append(now, i, L";");
+    i = append(now, i, val);
     SetEnvironmentVariable(var, now);
-}
-
-/**
- * env_switchto_freetown32 - Switch to 32-bit Freetown build environment
- * @prf:    Get environment variables from this profile
- *
- * Set the current process environment to the 32-bit Freetown build
- * environment obtaining its values from the specified profile.
- *
- * Returns zero on success.
- */
-int env_switchto_freetown32(struct profile *prf)
-{
-    SetEnvironmentVariable(L"PATH", prf->var[VAR_PATH]);
-
-    env_path_add_cwd();
-    env_arg_append(L"PATH", prf->dir[DIR_JRE]);
-    env_arg_append(L"PATH", prf->dir[DIR_GIT_BIN]);
-    env_arg_append(L"PATH", prf->dir[DIR_GIT_CMD]);
-    env_arg_append(L"PATH", prf->dir[DIR_GIT_TF]);
-    env_arg_append(L"PATH", prf->dir[DIR_SLICKEDIT]);
-    env_arg_append(L"PATH", prf->dir[DIR_CMAKE]);
-    env_arg_append(L"PATH", prf->dir[DIR_WPT]);
-    env_arg_append(L"PATH", prf->dir[DIR_MSBUILD12_32]);
-    env_arg_append(L"PATH", prf->dir[DIR_DOTNET4_32]);
-    env_arg_append(L"PATH", prf->dir[DIR_DOTNET4_TOOLS32]);
-    env_arg_append(L"PATH", prf->dir[DIR_VS2013]);
-    env_arg_append(L"PATH", prf->dir[DIR_WINSDK81_32]);
-    env_arg_append(L"PATH", prf->dir[DIR_WINDBG32]);
-
-    SetEnvironmentVariable(L"GITDIR", prf->dir[DIR_GIT]);
-    SetEnvironmentVariable(L"HOME", prf->dir[DIR_HOME]);
-    SetEnvironmentVariable(L"TBC", prf->dir[DIR_TBC]);
-    SetEnvironmentVariable(L"TDK", prf->dir[DIR_TDK_FREETOWN]);
-    SetEnvironmentVariable(L"TERM", prf->var[VAR_TERM]);
-
-    SetEnvironmentVariable(L"_NT_SYMBOL_PATH",
-                prf->var[VAR_NT_SYMBOL_PATH]);
-
-    SetEnvironmentVariable(L"TargetFrameworkSDKToolsDirectory",
-                prf->dir[DIR_DOTNET4_TOOLS32]);
-
-    return 0;
-}
-
-/**
- * env_switchto_freetown64 - Switch to 64-bit Freetown build environment
- * @prf:    Get environment values from this profile
- *
- * Set the current process environment to the 64-bit Freetown build
- * environment obtaining its values from the specified profile.
- *
- * Returns zero on success.
- */
-int env_switchto_freetown64(struct profile *prf)
-{
-    SetEnvironmentVariable(L"PATH", prf->var[VAR_PATH]);
-
-    env_path_add_cwd();
-    env_arg_append(L"PATH", prf->dir[DIR_JRE]);
-    env_arg_append(L"PATH", prf->dir[DIR_GIT_BIN]);
-    env_arg_append(L"PATH", prf->dir[DIR_GIT_CMD]);
-    env_arg_append(L"PATH", prf->dir[DIR_GIT_TF]);
-    env_arg_append(L"PATH", prf->dir[DIR_SLICKEDIT]);
-    env_arg_append(L"PATH", prf->dir[DIR_CMAKE]);
-    env_arg_append(L"PATH", prf->dir[DIR_WPT]);
-    env_arg_append(L"PATH", prf->dir[DIR_MSBUILD12_64]);
-    env_arg_append(L"PATH", prf->dir[DIR_DOTNET4_64]);
-    env_arg_append(L"PATH", prf->dir[DIR_DOTNET4_TOOLS64]);
-    env_arg_append(L"PATH", prf->dir[DIR_VS2013]);
-    env_arg_append(L"PATH", prf->dir[DIR_WINSDK81_64]);
-    env_arg_append(L"PATH", prf->dir[DIR_WINDBG64]);
-
-    SetEnvironmentVariable(L"GITDIR", prf->dir[DIR_GIT]);
-    SetEnvironmentVariable(L"HOME", prf->dir[DIR_HOME]);
-    SetEnvironmentVariable(L"TBC", prf->dir[DIR_TBC]);
-    SetEnvironmentVariable(L"TDK", prf->dir[DIR_TDK_FREETOWN]);
-    SetEnvironmentVariable(L"TERM", prf->var[VAR_TERM]);
-
-    SetEnvironmentVariable(L"_NT_SYMBOL_PATH",
-                prf->var[VAR_NT_SYMBOL_PATH]);
-
-    SetEnvironmentVariable(L"TargetFrameworkSDKToolsDirectory",
-                prf->dir[DIR_DOTNET4_TOOLS64]);
-
-    return 0;
 }
 
 /**
@@ -821,32 +700,32 @@ int env_switchto_hobart64(struct profile *prf)
     return 0;
 }
 
-int env_switchto_ibaraki32(struct profile *prf)
+void env_switchto_ibaraki32(struct profile *prf)
 {
     SetEnvironmentVariable(L"PATH", prf->var[VAR_PATH]);
     env_path_add_cwd();
+    env_arg_append(L"PATH", prf->dir[DIR_VIM]);
     env_arg_append(L"PATH", prf->dir[DIR_GIT_BIN]);
     env_arg_append(L"PATH", prf->dir[DIR_GIT_CMD]);
     env_arg_append(L"PATH", prf->dir[DIR_MSBUILD16_32]);
     env_arg_append(L"PATH", prf->dir[DIR_DOTNET461_32]);
     env_arg_append(L"PATH", prf->dir[DIR_DOTNET472_TOOLS32]);
     env_arg_append(L"PATH", prf->dir[DIR_WINSDK10_32]);
-    env_arg_append(L"PATH", prf->dir[DIR_VS2019]);
-    env_arg_append(L"PATH", prf->dir[DIR_CL14_32]);
+    env_arg_append(L"PATH", prf->dir[DIR_VS2022]);
+    env_arg_append(L"PATH", prf->dir[DIR_CL14_64]);
     env_arg_append(L"PATH", prf->dir[DIR_TDK_IBARAKI]);
     env_arg_append(L"PATH", prf->dir[DIR_DOTNET32]);
-    env_arg_append(L"PATH", prf->dir[DIR_CMAKE]);
 
+    SetEnvironmentVariable(L"CFG", L"RELEASE");
+    SetEnvironmentVariable(L"CPU", L"x86");
     SetEnvironmentVariable(L"GITDIR", prf->dir[DIR_GIT]);
     SetEnvironmentVariable(L"HOME", prf->dir[DIR_HOME]);
     SetEnvironmentVariable(L"TBC", prf->dir[DIR_TBC]);
     SetEnvironmentVariable(L"TDK", prf->dir[DIR_TDK_IBARAKI]);
     SetEnvironmentVariable(L"TERM", prf->var[VAR_TERM]);
-
-    return 0;
 }
 
-int env_switchto_ibaraki64(struct profile *prf)
+void env_switchto_ibaraki64(struct profile *prf)
 {
     SetEnvironmentVariable(L"PATH", prf->var[VAR_PATH]);
     env_path_add_cwd();
@@ -857,18 +736,18 @@ int env_switchto_ibaraki64(struct profile *prf)
     env_arg_append(L"PATH", prf->dir[DIR_DOTNET461_64]);
     env_arg_append(L"PATH", prf->dir[DIR_DOTNET480_TOOLS64]);
     env_arg_append(L"PATH", prf->dir[DIR_WINSDK10_64]);
-    env_arg_append(L"PATH", prf->dir[DIR_VS2019]);
+    env_arg_append(L"PATH", prf->dir[DIR_VS2022]);
     env_arg_append(L"PATH", prf->dir[DIR_CL14_64]);
     env_arg_append(L"PATH", prf->dir[DIR_TDK_IBARAKI]);
     env_arg_append(L"PATH", prf->dir[DIR_DOTNET64]);
 
+    SetEnvironmentVariable(L"CFG", L"RELEASE");
+    SetEnvironmentVariable(L"CPU", L"x64");
     SetEnvironmentVariable(L"GITDIR", prf->dir[DIR_GIT]);
     SetEnvironmentVariable(L"HOME", prf->dir[DIR_HOME]);
     SetEnvironmentVariable(L"TBC", prf->dir[DIR_TBC]);
     SetEnvironmentVariable(L"TDK", prf->dir[DIR_TDK_IBARAKI]);
     SetEnvironmentVariable(L"TERM", prf->var[VAR_TERM]);
-
-    return 0;
 }
 
 /**
@@ -899,6 +778,7 @@ int run_slickedit(enum arch arch, enum env env)
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
     struct profile *prf = profile_get();
     LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
+    int i;
 
     pi.hProcess = 0;
     pi.hThread = 0;
@@ -906,18 +786,19 @@ int run_slickedit(enum arch arch, enum env env)
     pi.dwThreadId = 0;
 
     child_argv[0] = '\0';
+    i =0;
     for (int n = 4; n < argc; ++n) {
-        StringCchCat(child_argv, MAX_PATH, L" \"");
-        StringCchCat(child_argv, MAX_PATH, argv[n]);
-        StringCchCat(child_argv, MAX_PATH, L"\"");
+        append(child_argv, i, L" \"");
+        append(child_argv, i, argv[n]);
+        append(child_argv, i, L" \"");
     }
     LocalFree(argv);
 
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t),
-            L"\"%s\" -sc %s %s",
-            prf->tool[TOOL_SLICKEDIT],
-            prf->dir[DIR_SLICKEDIT_CFG],
-            child_argv);
+    //StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t),
+    //        L"\"%s\" -sc %s %s",
+    //        prf->tool[TOOL_SLICKEDIT],
+    //        prf->dir[DIR_SLICKEDIT_CFG],
+    //        child_argv);
 
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
@@ -960,6 +841,7 @@ int run_commit(enum arch arch, enum env env)
     struct profile *prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
     LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
+    int i;
 
     pi.hProcess = 0;
     pi.hThread = 0;
@@ -967,16 +849,17 @@ int run_commit(enum arch arch, enum env env)
     pi.dwThreadId = 0;
 
     child_argv[0] = '\0';
+    i = 0;
     for (int n = 4; n < argc-1; ++n) {
-        StringCchCat(child_argv, MAX_PATH, L" \"");
-        StringCchCat(child_argv, MAX_PATH, argv[n]);
-        StringCchCat(child_argv, MAX_PATH, L"\"");
+        i = append(child_argv, i, L"\"");
+        i = append(child_argv, i, argv[n]);
+        i = append(child_argv, i, L"\"");
     }
     LocalFree(argv);
 
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t),
-            L"\"%s\" %s %s %s", prf->tool[TOOL_SLICKEDIT],
-            L"+new -sc ", prf->dir[DIR_SLICKEDIT_CFG], child_argv);
+    //StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t),
+    //        L"\"%s\" %s %s %s", prf->tool[TOOL_SLICKEDIT],
+    //        L"+new -sc ", prf->dir[DIR_SLICKEDIT_CFG], child_argv);
 
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
@@ -1005,8 +888,8 @@ int run_cmd(enum arch arch, enum env env)
     pi.dwProcessId = 0;
     pi.dwThreadId = 0;
 
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t), L"\"%s\"",
-            prf->tool[TOOL_CONSOLE]);
+    //StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t), L"\"%s\"",
+    //        prf->tool[TOOL_CONSOLE]);
 
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
@@ -1031,6 +914,7 @@ int run_diff(enum arch arch, enum env env)
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
     struct profile *prf = profile_get();
     LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
+    int i;
 
     pi.hProcess = 0;
     pi.hThread = 0;
@@ -1038,17 +922,26 @@ int run_diff(enum arch arch, enum env env)
     pi.dwThreadId = 0;
 
     child_argv[0] = '\0';
+    i=0;
     for (int n = 4; n < argc; ++n) {
         arg_rinse(argv[n]);
-        StringCchCat(child_argv, MAX_PATH, L" \"");
-        StringCchCat(child_argv, MAX_PATH, argv[n]);
-        StringCchCat(child_argv, MAX_PATH, L"\"");
+        i = append(child_argv, i, L" \"");
+        i = append(child_argv, i, argv[n]);
+        i = append(child_argv, i, L" \"");
     }
     LocalFree(argv);
 
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t),
-            L"\"%s\" %s %s %s", prf->tool[TOOL_SLICKEDIT_DIFF],
-            L"-sc ", prf->dir[DIR_SLICKEDIT_CFG], child_argv);
+    i=0;
+    i = append(cmdline, i, L"\"");
+    i = append(cmdline, i, prf->tool[TOOL_SLICKEDIT_DIFF]);
+    i = append(cmdline, i, L"\" -sc ");
+    i = append(cmdline, i, prf->dir[DIR_SLICKEDIT_CFG]);
+
+    i = append(cmdline, i, L" \"");
+    i = append(cmdline, i, L" \"");
+    i = append(cmdline, i, L" \"");
+    i = append(cmdline, i, L" \"");
+
 
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
@@ -1074,6 +967,7 @@ int run_merge(enum arch arch, enum env env)
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
     struct profile *prf = profile_get();
     LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
+    int i;
 
     pi.hProcess = 0;
     pi.hThread = 0;
@@ -1081,17 +975,18 @@ int run_merge(enum arch arch, enum env env)
     pi.dwThreadId = 0;
 
     child_argv[0] = '\0';
+    i=0;
     for (int n = 4; n < argc; ++n) {
         arg_rinse(argv[n]);
-        StringCchCat(child_argv, MAX_PATH, L" \"");
-        StringCchCat(child_argv, MAX_PATH, argv[n]);
-        StringCchCat(child_argv, MAX_PATH, L"\"");
+        i = append(child_argv, i, L" \"");
+        i = append(child_argv, i, argv[n]);
+        i = append(child_argv, i, L" \"");
     }
     LocalFree(argv);
 
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t),
-            L"\"%s\" %s %s %s", prf->tool[TOOL_SLICKEDIT_MERGE],
-            L"-sc ", prf->dir[DIR_SLICKEDIT_CFG], child_argv);
+    //StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t),
+    //        L"\"%s\" %s %s %s", prf->tool[TOOL_SLICKEDIT_MERGE],
+    //        L"-sc ", prf->dir[DIR_SLICKEDIT_CFG], child_argv);
 
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
@@ -1146,6 +1041,37 @@ int env_path_add_cwd()
     return 0;
 }
 
+int quote(wchar_t* x, int xi, wchar_t* y)
+{
+    int yi = 0;
+
+    x[xi] = L'\"';
+    ++xi;
+
+    while( (yi < 256) && (y[yi] > 0) ) {
+        x[xi] = y[yi];
+        ++xi;
+        ++yi;
+    }
+    x[xi] = L'\"';
+    ++xi;
+    x[xi] = 0;
+    return xi;
+}
+
+int append(wchar_t* x, int xi, wchar_t* y)
+{
+    int yi = 0;
+
+    while( (yi < 256) && (y[yi] > 0) ) {
+        x[xi] = y[yi];
+        ++xi;
+        ++yi;
+    }
+    x[xi] = 0;
+    return xi;
+}
+
 /**
  * run_bash - Run the MySys GIT BASH shell
  * @arch:   processor architecture X86 or X64
@@ -1160,172 +1086,37 @@ int run_bash(enum arch arch, enum env env)
     wchar_t cmdline[2048];
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
     struct profile *prf = profile_get();
+    int i;
 
     pi.hProcess = 0;
     pi.hThread = 0;
     pi.dwProcessId = 0;
     pi.dwThreadId = 0;
 
-    StringCchPrintf(
-        cmdline,
-        sizeof(cmdline) / sizeof(wchar_t),
-        L"\"%s\" %s %s %s %s %s %s\"%s\" %s \"%s\" %s",
-        prf->tool[TOOL_MINTTY],
-        L"-t BASH",
-        L"--nodaemon",
-        L"-o AppID=GitForWindows.Bash",
-        L"-o AppName=\"Git Bash\"",
-        L"--store-taskbar-properties",
-        L"-o AppLanchCmd=",
-        prf->tool[TOOL_BASH],
-        L"-i",
-        prf->tool[TOOL_BASH],
-        L"-- /usr/bin/bash --login -i"
-    );
+    i = 0;
+    i = quote(cmdline, i, prf->tool[TOOL_MINTTY]);
+    i = append(cmdline, i, L" -t BASH --nodaemon");
+    i = append(cmdline, i, L" -o AppID=GitForWindows.Bash");
+    i = append(cmdline, i, L" -o AppName=\"Git Bash\"");
+    i = append(cmdline, i, L" --store-taskbar-properties");
+    i = append(cmdline, i, L" -o AppLanchCmd=");
+    i = quote(cmdline, i, prf->tool[TOOL_BASH]);
+    i = append(cmdline, i, L" -i ");
+    i = quote(cmdline, i, prf->tool[TOOL_BASH]);
+    i = append(cmdline, i, L" -- /usr/bin/bash --login -i");
 
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
     CreateProcess(
         prf->tool[TOOL_MINTTY],
         cmdline,
-        0,
-        0,
+        0, 0,
         FALSE,
         createFlags,
         0,
         prf->dir[DIR_PROJECT],
         &si, &pi
     );
-
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-    return 0;
-}
-
-/**
- * run_vs2012 - Run Visual Studio 2012
- * @arch:   processor architecture X86 or X64
- * @env:    the desired environment
- *
- * Returns zero on success.
- */
-int run_vs2012(enum arch arch, enum env env)
-{
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-    struct profile *prf = profile_get();
-    DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
-
-    pi.hProcess = 0;
-    pi.hThread = 0;
-    pi.dwProcessId = 0;
-    pi.dwThreadId = 0;
-
-
-    DeleteFile(prf->file[FILE_VS2012_SETTINGS_CURRENT]);
-    CopyFile(prf->file[FILE_VS2012_SETTINGS_MASTER],
-         prf->file[FILE_VS2012_SETTINGS_CURRENT], FALSE);
-
-    env_switchto(arch, env, prf);
-    set_child_startupinfo(&si);
-    CreateProcess(prf->tool[TOOL_VS2012], prf->tool[TOOL_VS2012], 0, 0, FALSE,
-            createFlags, 0, prf->dir[DIR_PROJECT], &si, &pi);
-
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-    return 0;
-}
-
-/**
- * run_vs2013 - Run Visual Studio 2013
- * @arch:   processor architecture X86 or X64
- * @env:    the desired environment
- *
- * Returns zero on success.
- */
-int run_vs2013(enum arch arch, enum env env)
-{
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-    struct profile *prf = profile_get();
-    DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
-
-    pi.hProcess = 0;
-    pi.hThread = 0;
-    pi.dwProcessId = 0;
-    pi.dwThreadId = 0;
-
-
-    DeleteFile(prf->file[FILE_VS2013_SETTINGS_CURRENT]);
-    CopyFile(prf->file[FILE_VS2013_SETTINGS_MASTER],
-            prf->file[FILE_VS2013_SETTINGS_CURRENT], FALSE);
-
-    env_switchto(arch, env, prf);
-    set_child_startupinfo(&si);
-    CreateProcess(prf->tool[TOOL_VS2013], prf->tool[TOOL_VS2013], 0, 0, FALSE, createFlags,
-            0, prf->dir[DIR_PROJECT], &si, &pi);
-
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-    return 0;
-}
-
-/**
- * run_vs2015 - Run Visual Studio 2015
- * @arch:   processor architecture X86 or X64
- * @env:    the desired environment
- *
- * Returns zero on success.
- */
-int run_vs2015(enum arch arch, enum env env)
-{
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-    struct profile *prf = profile_get();
-    DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
-
-    pi.hProcess = 0;
-    pi.hThread = 0;
-    pi.dwProcessId = 0;
-    pi.dwThreadId = 0;
-
-    DeleteFile(prf->file[FILE_VS2015_SETTINGS_CURRENT]);
-    CopyFile(prf->file[FILE_VS2015_SETTINGS_MASTER],
-         prf->file[FILE_VS2015_SETTINGS_CURRENT], FALSE);
-
-    env_switchto(arch, env, prf);
-    set_child_startupinfo(&si);
-    CreateProcess(prf->tool[TOOL_VS2015], prf->tool[TOOL_VS2015], 0, 0, FALSE,
-            createFlags, 0, prf->dir[DIR_PROJECT], &si, &pi);
-
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-    return 0;
-}
-
-/**
-* run_vs2017 - Run Visual Studio 2017
-* @arch:    processor architecture X86 or X64
-* @env: the desired environment
-*
-* Returns zero on success.
-*/
-int run_vs2017(enum arch arch, enum env env)
-{
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-    struct profile *prf = profile_get();
-    DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
-
-    pi.hProcess = 0;
-    pi.hThread = 0;
-    pi.dwProcessId = 0;
-    pi.dwThreadId = 0;
-
-    env_switchto(arch, env, prf);
-    set_child_startupinfo(&si);
-    CreateProcess(prf->tool[TOOL_VS2017], prf->tool[TOOL_VS2017], 0, 0, FALSE,
-        createFlags, 0, prf->dir[DIR_PROJECT], &si, &pi);
 
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
@@ -1341,57 +1132,37 @@ int run_vs2017(enum arch arch, enum env env)
 */
 int run_vs2019(enum arch arch, enum env env)
 {
+    int argc;
+    int i;
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
     wchar_t cmdline[MAX_PATH];
-    struct profile *prf = profile_get();
+    struct profile* prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
+    LPWSTR cl = GetCommandLine();
+    LPWSTR* argv = CommandLineToArgvW(cl, &argc);
 
-    StringCchPrintf(cmdline, sizeof(cmdline) /sizeof(wchar_t),
-                    L"\"%s\" %s", prf->tool[TOOL_VS2019], L"/LOG");
+    i=0;
+    i = quote(cmdline, i, prf->tool[TOOL_VS2019]);
+    i = append(cmdline, i, L" ");
+
+    for (int n = 4; n < argc; ++n) {
+        arg_rinse(argv[n]);
+        i = append(cmdline, i, argv[n]);
+        i = append(cmdline, i, L" ");
+    }
+    LocalFree(argv);
 
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
-    CreateProcess(prf->tool[TOOL_VS2019], cmdline, 0, 0, FALSE,
-        createFlags, 0, prf->dir[DIR_PROJECT], &si, &pi);
-
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-    return 0;
-}
-
-int run_vs2022(enum arch arch, enum env env)
-{
-    int argc;
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-    wchar_t cmdline[MAX_PATH];
-    wchar_t child_argv[MAX_PATH];
-    struct profile* prf = profile_get();
-    DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
-    LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
 
     pi.hProcess = 0;
     pi.hThread = 0;
     pi.dwProcessId = 0;
     pi.dwThreadId = 0;
 
-    child_argv[0] = '\0';
-    for (int n = 4; n < argc; ++n) {
-        arg_rinse(argv[n]);
-        StringCchCat(child_argv, MAX_PATH, argv[n]);
-        StringCchCat(child_argv, MAX_PATH, L" ");
-    }
-    LocalFree(argv);
-
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t),
-        L"\"%s\" %s", prf->tool[TOOL_VS2022], child_argv);
-
-    env_switchto(arch, env, prf);
-    set_child_startupinfo(&si);
-
     CreateProcess (
-        prf->tool[TOOL_VS2022],
+        prf->tool[TOOL_VS2019],
         cmdline, 0, 0, FALSE, createFlags, 0,
         prf->dir[DIR_PROJECT],
         &si, &pi
@@ -1402,34 +1173,43 @@ int run_vs2022(enum arch arch, enum env env)
     return 0;
 }
 
-/**
- * run_tfs2013 - Run Visual Studio 2013 wit Team Foundation Server settings
- * @arch:   processor architecture X86 or X64
- * @env:    the desired environment
- *
- * Returns zero on success.
- */
-int run_tfs2013(enum arch arch, enum env env)
+int run_vs2022(enum arch arch, enum env env)
 {
+    int argc;
+    int i;
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    struct profile *prf = profile_get();
+    wchar_t cmdline[MAX_PATH];
+    struct profile* prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
+    LPWSTR cl = GetCommandLine();
+    LPWSTR* argv = CommandLineToArgvW(cl, &argc);
+
+    i=0;
+    i = quote(cmdline, i, prf->tool[TOOL_VS2022]);
+    i = append(cmdline, i, L" ");
+
+    for (int n = 4; n < argc; ++n) {
+        arg_rinse(argv[n]);
+        i = append(cmdline, i, argv[n]);
+        i = append(cmdline, i, L" ");
+    }
+    LocalFree(argv);
+
+    env_switchto(arch, env, prf);
+    set_child_startupinfo(&si);
 
     pi.hProcess = 0;
     pi.hThread = 0;
     pi.dwProcessId = 0;
     pi.dwThreadId = 0;
 
-
-    DeleteFile(prf->file[FILE_VS2013_SETTINGS_CURRENT]);
-    CopyFile(prf->file[FILE_VS2013_SETTINGS_MASTER],
-         prf->file[FILE_VS2013_SETTINGS_CURRENT], FALSE);
-
-    env_switchto(arch, env, prf);
-    set_child_startupinfo(&si);
-    CreateProcess(prf->tool[TOOL_VS2013], prf->tool[TOOL_VS2013], 0, 0, FALSE,
-            createFlags, 0, prf->dir[DIR_PROJECT], &si, &pi);
+    CreateProcess (
+        prf->tool[TOOL_VS2022],
+        cmdline, 0, 0, FALSE, createFlags, 0,
+        prf->dir[DIR_PROJECT],
+        &si, &pi
+    );
 
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
@@ -1446,71 +1226,39 @@ int run_tfs2013(enum arch arch, enum env env)
 int run_vim(enum arch arch, enum env env)
 {
     int argc;
+    int i;
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
     wchar_t cmdline[MAX_PATH];
-    wchar_t child_argv[MAX_PATH];
     struct profile *prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
-    LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
+    LPWSTR cl = GetCommandLine();
+    LPWSTR* argv = CommandLineToArgvW(cl, &argc);
 
-    pi.hProcess = 0;
-    pi.hThread = 0;
-    pi.dwProcessId = 0;
-    pi.dwThreadId = 0;
+    i=0;
+    i = quote(cmdline, i, prf->tool[TOOL_VIM]);
+    i = append(cmdline, i, L" ");
 
-
-    child_argv[0] = '\0';
     for (int n = 4; n < argc; ++n) {
-        StringCchCat(child_argv, MAX_PATH, L" \"");
-        StringCchCat(child_argv, MAX_PATH, argv[n]);
-        StringCchCat(child_argv, MAX_PATH, L"\"");
+        i = append(cmdline, i, argv[n]);
+        i = append(cmdline, i, L" ");
     }
     LocalFree(argv);
 
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t),
-            L"\"%s\" %s",
-            prf->tool[TOOL_VIM],
-            child_argv);
-
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
-    CreateProcess(prf->tool[TOOL_VIM], cmdline, 0, 0, FALSE,
-            createFlags, 0, 0, &si, &pi);
-
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-    return 0;
-}
-
-/**
- * run_tfs2012 - Run Visual Studio 2012 with Team Foundation Server settings
- * @arch:   processor architecture X86 or X64
- * @env:    the desired environment
- *
- * Returns zero on success.
- */
-int run_tfs2012(enum arch arch, enum env env)
-{
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-    struct profile *prf = profile_get();
-    DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
 
     pi.hProcess = 0;
     pi.hThread = 0;
     pi.dwProcessId = 0;
     pi.dwThreadId = 0;
 
-
-    DeleteFile(prf->file[FILE_VS2012_SETTINGS_CURRENT]);
-    CopyFile(prf->file[FILE_VS2012_SETTINGS_MASTER],
-         prf->file[FILE_VS2012_SETTINGS_CURRENT], FALSE);
-
-    env_switchto(arch, env, prf);
-    set_child_startupinfo(&si);
-    CreateProcess(prf->tool[TOOL_VS2012], prf->tool[TOOL_VS2012], 0, 0, FALSE,
-            createFlags, 0, prf->dir[DIR_PROJECT], &si, &pi);
+    CreateProcess(
+        prf->tool[TOOL_VIM], cmdline,
+        0, 0, FALSE,
+        createFlags, 0, 0,
+        &si, &pi
+    );
 
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
@@ -1527,42 +1275,44 @@ int run_tfs2012(enum arch arch, enum env env)
 int run_windbg(enum arch arch, enum env env)
 {
     int argc;
+    int i;
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
     wchar_t cmdline[MAX_PATH];
-    wchar_t child_argv[MAX_PATH];
     wchar_t *tool;
     struct profile *prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
-    LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
-
-    pi.hProcess = 0;
-    pi.hThread = 0;
-    pi.dwProcessId = 0;
-    pi.dwThreadId = 0;
-
-
-    child_argv[0] = '\0';
-    for (int n = 4; n < argc; ++n) {
-        arg_rinse(argv[n]);
-        StringCchCat(child_argv, MAX_PATH, argv[n]);
-        StringCchCat(child_argv, MAX_PATH, L" ");
-    }
-    LocalFree(argv);
+    LPWSTR cl = GetCommandLine();
+    LPWSTR* argv = CommandLineToArgvW(cl, &argc);
 
     if (X64 == arch)
         tool = prf->tool[TOOL_WINDBG64];
     else
         tool = prf->tool[TOOL_WINDBG32];
 
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t),
-            L"\"%s\" %s", tool, child_argv);
+    i=0;
+    i = quote(cmdline, i, tool);
+    i = append(cmdline, i, L" ");
+    for (int n = 4; n < argc; ++n) {
+        arg_rinse(argv[n]);
+        i = append(cmdline, i, argv[n]);
+        i = append(cmdline, i, L" ");
+    }
+    LocalFree(argv);
+
+    pi.hProcess = 0;
+    pi.hThread = 0;
+    pi.dwProcessId = 0;
+    pi.dwThreadId = 0;
 
     env_switchto(arch, env, prf);
     set_child_startupinfo(&si);
-    CreateProcess((X64 == arch) ? prf->tool[TOOL_WINDBG64] : prf->tool[TOOL_WINDBG32],
-            cmdline, 0, 0, FALSE, createFlags, 0,
-            prf->dir[DIR_PROJECT], &si, &pi);
+    CreateProcess(
+        tool, cmdline,
+        0, 0, FALSE, createFlags, 0,
+        prf->dir[DIR_PROJECT],
+        &si, &pi
+    );
 
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
@@ -1579,40 +1329,41 @@ int run_windbg(enum arch arch, enum env env)
 int run_vscode(enum arch arch, enum env env)
 {
     int argc;
+    int i;
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
     wchar_t cmdline[MAX_PATH];
     wchar_t child_argv[MAX_PATH];
-    wchar_t *tool;
     struct profile *prf = profile_get();
     DWORD createFlags = CREATE_UNICODE_ENVIRONMENT;
-    LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
+    LPWSTR cl = GetCommandLine();
+    LPWSTR* argv = CommandLineToArgvW(cl, &argc);
+
+    i=0;
+    i = quote(cmdline, i, prf->tool[TOOL_VSCODE]);
+    i = append(cmdline, i, L" ");
+
+    child_argv[0] = '\0';
+    for (int n = 4; n < argc; ++n) {
+        arg_rinse(argv[n]);
+        i = append(cmdline, i, argv[n]);
+        i = append(cmdline, i, L" ");
+    }
+    LocalFree(argv);
+
+    env_switchto(arch, env, prf);
+    set_child_startupinfo(&si);
 
     pi.hProcess = 0;
     pi.hThread = 0;
     pi.dwProcessId = 0;
     pi.dwThreadId = 0;
 
-    child_argv[0] = '\0';
-    for (int n = 4; n < argc; ++n) {
-        arg_rinse(argv[n]);
-        StringCchCat(child_argv, MAX_PATH, argv[n]);
-        StringCchCat(child_argv, MAX_PATH, L" ");
-    }
-    LocalFree(argv);
-
-    if (X64 == arch)
-        tool = prf->tool[TOOL_VSCODE];
-    else
-        tool = prf->tool[TOOL_VSCODE];
-
-    StringCchPrintf(cmdline, sizeof(cmdline) / sizeof(wchar_t), L"\"%s\" %s", tool, child_argv);
-
-    env_switchto(arch, env, prf);
-    set_child_startupinfo(&si);
-    CreateProcess((X64 == arch) ? prf->tool[TOOL_VSCODE] : prf->tool[TOOL_VSCODE],
-        cmdline, 0, 0, FALSE, createFlags, 0,
-        prf->dir[DIR_PROJECT], &si, &pi);
+    CreateProcess(
+        prf->tool[TOOL_VSCODE], cmdline,
+        0, 0, FALSE, createFlags, 0,
+        prf->dir[DIR_PROJECT],
+        &si, &pi);
 
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
