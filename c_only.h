@@ -105,7 +105,7 @@
 #define C_ONLY_VS2015 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2015\\Enterprise\\Common7\\IDE\\devenv.exe"
 #define C_ONLY_VS2017 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\IDE\\devenv.exe"
 #define C_ONLY_VS2019 L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\IDE\\devenv.exe"
-#define C_ONLY_VS2022 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\Common7\\IDE\\dvenv.exe"
+#define C_ONLY_VS2022 L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\Common7\\IDE\\devenv.exe"
 #define C_ONLY_WINDBG32 L"C:\\Program Files (x86)\\Windows Kits\\8.1\\Debuggers\\x86\\windbg.exe"
 #define C_ONLY_WINDBG64 L"C:\\Program Files (x86)\\Windows Kits\\8.1\\Debuggers\\x64\\windbg.exe"
 #define C_ONLY_VSCODE L"C:\\Program Files\\Microsoft VS Code\\Code.exe"

@@ -1,0 +1,60 @@
+#!/bin/bash
+# Turn on debugging: set -x
+
+# Exit on first error: set -e
+set -e
+
+CurrentDirectory="$(dirname "$(realpath -s "$0")")"
+Now=${Now:-$(date -u +%y%m%d%H%M)}
+Start=$(date +%s)
+
+printf "  Settings\n"
+printf "  -------------------------------------------------------------------\n"
+printf "  Current Directory = %s\n" ${CurrentDirectory}
+printf "  Now               = %s\n" ${Now}
+printf "  -------------------------------------------------------------------\n"
+
+KIT="10.0.19041.0"
+MSVC="14.33.31629"
+
+# COMPILER INCLUDE FILES
+unset INCLUDE
+export INCLUDE=/c/Program\ Files\ \(x86\)/Windows\ Kits/10/Include/${KIT}/shared
+export INCLUDE=${INCLUDE}:/c/Program\ Files\ \(x86\)/Windows\ Kits/10/Include/${KIT}/um
+export INCLUDE=${INCLUDE}:/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Enterprise/VC/Tools/MSVC/${MSVC}/include
+export INCLUDE=${INCLUDE}:/c/Program\ Files\ \(x86\)/Windows\ Kits/10/Include/${KIT}/ucrt
+
+# COMPILER LIB PATHS
+unset LIB
+export LIB=/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Enterprise/VC/Tools/MSVC/${MSVC}/lib/x64
+export LIB=${LIB}:/c/Program\ Files\ \(x86\)/Windows\ Kits/10/Lib/${KIT}/um/x64
+export LIB=${LIB}:/c/Program\ Files\ \(x86\)/Windows\ Kits/10/Lib/${KIT}/ucrt/x64
+
+cc() {
+    # c           Compile without linking
+    # GS-         Disable Security Checks
+    # GS0         Disable Stack Probes
+    # Gz          Uses the __stdcall calling convention. (x86 only)
+    # MT          Static link multithread
+    # O1          Create small code
+    # Ob2         Expand any function not explicitly marked for no inlining.
+    # W4          Warning Level
+    # Zc:wchar_t  wchar_t is native type
+    cflags='-c -GS- -Gs8192 -Gz -MT -O1 -Ob2 -Zc:wchar_t -W4 -D_UNICODE -D_WINDOWS -DNDEBUG -DUNICODE -DWIN32'
+    /c/Program\ Files/Microsoft\ Visual\ Studio/2022/Enterprise/VC/Tools/MSVC/${MSVC}/bin/Hostx64/x64/cl.exe ${cflags} "$@"
+}
+
+# LINKER
+ld () {
+    ldflags='-NODEFAULTLIB -SUBSYSTEM:WINDOWS -ENTRY:rawmain'
+    /c/Program\ Files/Microsoft\ Visual\ Studio/2022/Enterprise/VC/Tools/MSVC/${MSVC}/bin/Hostx64/x64/link.exe ${ldflags} "$@"
+}
+
+# BUILD
+rm -f rm -f estart.exe estart.obj
+cc estart.c
+ld -out:estart.exe estart.obj kernel32.lib shlwapi.lib shell32.lib ucrt.lib
+
+Finish=$(date +%s)
+Duration=$((Finish - Start))
+printf "  Duration: ${Duration}(s)\n\n\n"
